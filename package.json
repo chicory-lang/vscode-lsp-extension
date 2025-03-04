@@ -1,0 +1,48 @@
+{
+  "name": "chicory-lsp",
+  "description": "",
+  "author": "James Cuénod",
+  "license": "MIT",
+  "version": "1.0.0",
+  "publisher": "chicory-lang",
+  "categories": [],
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "activationEvents": [
+    "onLanguage"
+  ],
+  "main": "./client/out/extension",
+  "contributes": {
+    "languages": [
+      {
+        "id": "chicory",
+        "aliases": [
+          "Chicory",
+          "chicory"
+        ],
+        "extensions": [
+          ".chic"
+        ],
+        "configuration": "./client/language-configuration.json"
+      }
+    ],
+    "grammars": [
+        {
+            "language": "chicory",
+            "scopeName": "source.chicory",
+            "path": "./client/syntaxes/chicory.tmLanguage.json"
+        }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd .."
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.7",
+    "typescript": "^5.2.2"
+  }
+}

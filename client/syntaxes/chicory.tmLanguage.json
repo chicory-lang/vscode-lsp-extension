@@ -1,0 +1,559 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "Chicory",
+    "scopeName": "source.chicory",
+    "patterns": [
+      { "include": "#statements" },
+      { "include": "#expressions" },
+      { "include": "#keywords" },
+      { "include": "#literals" },
+      { "include": "#comments" }
+    ],
+    "repository": {
+      "statements": {
+        "patterns": [
+          {
+            "name": "meta.assignment.chicory",
+            "begin": "(let|const)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)",
+            "end": "\\n",
+            "beginCaptures": {
+              "1": { "name": "keyword.control.assignment.chicory" },
+              "2": { "name": "variable.other.chicory" },
+              "3": { "name": "keyword.operator.assignment.chicory" }
+            },
+            "patterns": [
+              { "include": "#expressions" }
+            ]
+          },
+          {
+            "name": "meta.type.definition.chicory",
+            "begin": "(type)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)",
+            "end": "\\n",
+            "beginCaptures": {
+              "1": { "name": "keyword.control.type.chicory" },
+              "2": { "name": "entity.name.type.chicory" },
+              "3": { "name": "keyword.operator.assignment.chicory" }
+            },
+            "patterns": [
+              { "include": "#typeExpr" }
+            ]
+          },
+          {
+            "name": "meta.import.chicory",
+            "begin": "(import)\\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:,\\s*(\\{[\\s\\n]*[a-zA-Z_][a-zA-Z0-9_]*(?:,[\\s\\n]*[a-zA-Z_][a-zA-Z0-9_]*)*[\\s\\n]*\\}))?\\s+(from)\\s+(\"[^\"\\n]*\")",
+            "end": "\\n",
+            "beginCaptures": {
+              "1": { "name": "keyword.control.import.chicory" },
+              "2": { "name": "variable.other.readwrite.alias.chicory" },
+              "3": { "name": "meta.import.destructuring.chicory" },
+              "4": { "name": "keyword.control.from.chicory" },
+              "5": { "name": "string.quoted.double.chicory" }
+            },
+            "patterns": [
+              { "include": "#destructuringImport" }
+            ]
+          },
+          {
+            "name": "meta.import.destructuringOnly.chicory",
+            "begin": "(import)\\s+(\\{[\\s\\n]*[a-zA-Z_][a-zA-Z0-9_]*(?:,[\\s\\n]*[a-zA-Z_][a-zA-Z0-9_]*)*[\\s\\n]*\\})\\s+(from)\\s+(\"[^\"\\n]*\")",
+            "end": "\\n",
+            "beginCaptures": {
+              "1": { "name": "keyword.control.import.chicory" },
+              "2": { "name": "meta.import.destructuring.chicory" },
+              "3": { "name": "keyword.control.from.chicory" },
+              "4": { "name": "string.quoted.double.chicory" }
+            },
+            "patterns": [
+              { "include": "#destructuringImport" }
+            ]
+  
+          },
+          {
+              "name": "meta.export.chicory",
+              "begin": "(export)\\s+(\\{[\\s\\n]*[a-zA-Z_][a-zA-Z0-9_]*(?:,[\\s\\n]*[a-zA-Z_][a-zA-Z0-9_]*)*,?[\\s\\n]*\\})",
+              "end": "\\n",
+              "beginCaptures": {
+                  "1": { "name": "keyword.control.export.chicory" },
+                  "2": { "name": "meta.export.destructuring.chicory" }
+              },
+               "patterns": [
+                { "include": "#destructuringImport" }
+               ]
+          },
+          { "include": "#expressions" }
+        ]
+      },
+      "destructuringImport":{
+          "patterns":[
+              {
+                "match": "([a-zA-Z_][a-zA-Z0-9_]*)",
+                "name": "variable.other.readwrite.chicory"
+              },
+              {
+                "match": ",",
+                "name": "punctuation.separator.comma.chicory"
+              },
+               {
+                  "match":"\\{",
+                  "name":"punctuation.section.group.chicory"
+               },
+               {
+                  "match":"\\}",
+                  "name":"punctuation.section.group.chicory"
+               }
+          ]
+      },
+      "typeExpr": {
+          "patterns":[
+              { "include": "#adtType" },
+              { "include": "#recordType" },
+              { "include": "#tupleType" },
+              { "include": "#primitiveType" }
+          ]
+      },
+       "adtType":{
+          "begin": "(\\|)?",
+          "end": "\\n",
+          "beginCaptures": {
+              "1": { "name": "keyword.operator.pipe.chicory" }
+          },
+          "patterns":[
+               { "include": "#adtOption" },
+               {
+                  "match": "\\|",
+                  "name": "keyword.operator.pipe.chicory"
+               }
+          ]
+       },
+  
+      "adtOption": {
+        "patterns": [
+            {
+               "name": "meta.adt.option.chicory",
+               "begin" : "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()\\s*(\\{)",
+               "end": "\\)",
+               "beginCaptures":{
+                  "1":{"name":"entity.name.type.variant.chicory"},
+                  "2":{"name":"punctuation.section.group.chicory"},
+                  "3":{"name":"punctuation.definition.block.chicory"}
+               },
+               "endCaptures":{
+                  "0":{"name":"punctuation.section.group.chicory"}
+               },
+               "patterns":[
+                  { "include": "#adtTypeAnnotation" },
+                  { "match": "\\,", "name": "punctuation.separator.comma.chicory"},
+                  { "match": "\\{", "name": "punctuation.definition.block.begin.chicory" },
+                  { "match": "\\}", "name": "punctuation.definition.block.end.chicory" }
+  
+               ]
+            },
+            {
+              "name": "meta.adt.option.simple.chicory",
+              "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(\\()\\s*(number|string|boolean)\\s*(\\))",
+              "captures": {
+                  "1": { "name": "entity.name.type.variant.chicory" },
+                  "2": { "name": "punctuation.section.group.chicory" },
+                  "3": { "name": "entity.name.type.primitive.chicory" },
+                  "4": { "name": "punctuation.section.group.chicory" }
+              }
+            },
+          {
+            "name": "meta.adt.option.identifier.chicory",
+            "match": "([a-zA-Z_][a-zA-Z0-9_]*)",
+            "captures": {
+              "1": { "name": "entity.name.type.variant.chicory" }
+            }
+          }
+        ]
+      },
+  
+       "adtTypeAnnotation":{
+          "name": "meta.adt.type.annotation.chicory",
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(:)\\s*(number|string|boolean|[a-zA-Z_][a-zA-Z0-9_]*)",
+          "captures":{
+              "1":{"name": "variable.parameter.chicory"},
+              "2":{"name": "punctuation.separator.colon.chicory"},
+              "3":{"name": "entity.name.type.chicory"}
+          }
+       },
+  
+      "recordType":{
+        "begin": "\\{",
+        "end": "\\}",
+        "beginCaptures": {
+          "0": { "name": "punctuation.definition.block.begin.chicory" }
+        },
+        "endCaptures": {
+          "0": { "name": "punctuation.definition.block.end.chicory" }
+        },
+        "patterns": [
+            { "include": "#recordTypeAnnotation" },
+            {
+              "match": ",",
+              "name": "punctuation.separator.comma.chicory"
+            }
+        ]
+      },
+      "recordTypeAnnotation": {
+        "name": "meta.record.type.annotation.chicory",
+        "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(:)\\s*(number|string|boolean|[a-zA-Z_][a-zA-Z0-9_]*|\\{[\\s\\S]*?\\})",
+        "captures": {
+            "1": { "name": "variable.parameter.chicory" },
+            "2": { "name": "punctuation.separator.colon.chicory" },
+            "3": { "name": "entity.name.type.chicory" }
+        }
+      },
+  
+       "tupleType":{
+          "begin": "\\[",
+          "end": "\\]",
+          "beginCaptures": {
+              "0": { "name": "punctuation.definition.array.begin.chicory" }
+          },
+          "endCaptures": {
+            "0": { "name": "punctuation.definition.array.end.chicory" }
+          },
+          "patterns": [
+               { "include": "#tupleField" },
+               {
+                  "match": ",",
+                  "name": "punctuation.separator.comma.chicory"
+               }
+          ]
+       },
+      "tupleField": {
+         "patterns":[
+          {
+              "match": "(number|string|boolean)",
+              "name":"entity.name.type.primitive.chicory"
+          },
+          {
+              "match": "([a-zA-Z_][a-zA-Z0-9_]*)",
+              "name":"entity.name.type.chicory"
+          }
+         ]
+      },
+  
+      "primitiveType":{
+          "match": "(number|string|boolean)",
+          "name": "entity.name.type.primitive.chicory"
+      },
+      "expressions": {
+        "patterns": [
+          { "include": "#parenthesizedExpression" },
+          { "include": "#ifExpression" },
+          { "include": "#functionExpression" },
+          { "include": "#jsxExpression" },
+          { "include": "#matchExpression" },
+          { "include": "#blockExpression" },
+          { "include": "#memberExpression" },
+          { "include": "#indexExpression" },
+          { "include": "#callExpression" },
+          { "include": "#operationExpression" },
+          { "include": "#identifierExpression" },
+          { "include": "#literals" }
+  
+        ]
+      },
+      "parenthesizedExpression": {
+        "name": "meta.parenthesized.chicory",
+        "begin": "\\(",
+        "end": "\\)",
+        "beginCaptures": {
+          "0": { "name": "punctuation.section.group.begin.chicory" }
+        },
+        "endCaptures": {
+          "0": { "name": "punctuation.section.group.end.chicory" }
+        },
+        "patterns": [
+          { "include": "#expressions" }
+        ]
+      },
+      "ifExpression": {
+        "name": "meta.if.chicory",
+        "begin": "(if)\\s*(\\()",
+        "end": "(\\))",
+        "beginCaptures":{
+          "1":{ "name": "keyword.control.conditional.if.chicory"},
+          "2":{"name": "punctuation.section.group.chicory"}
+        },
+        "endCaptures":{
+          "0":{"name":"punctuation.section.group.chicory"}
+        },
+        "patterns": [
+          { "include": "#expressions" },
+           {
+              "begin": "else\\s+if",
+              "end": "(?=\\))",
+               "beginCaptures":{
+                  "0":{"name":"keyword.control.conditional.else-if.chicory"}
+               }
+           },
+           {
+              "begin": "else",
+              "end": "(?=\\n|\\)|\\})",
+              "beginCaptures":{
+                  "0":{"name": "keyword.control.conditional.else.chicory"}
+              }
+           }
+  
+        ]
+      },
+      "functionExpression": {
+        "name": "meta.function.chicory",
+        "begin": "(\\()\\s*",
+        "end": "\\s*(=>)\\s*",
+        "beginCaptures": {
+          "1": { "name": "punctuation.definition.parameters.begin.chicory" }
+        },
+        "endCaptures": {
+          "1": { "name": "keyword.operator.arrow.chicory" }
+        },
+        "patterns": [
+          { "include": "#parameterList" },
+          {
+            "match": "\\)",
+            "name": "punctuation.definition.parameters.end.chicory"
+          },
+          { "include": "#expressions" }
+        ]
+      },
+  
+      "parameterList": {
+          "patterns":[
+              {
+                "match": "([a-zA-Z_][a-zA-Z0-9_]*)",
+                "name": "variable.parameter.function.chicory"
+              },
+              {
+                "match": ",",
+                "name": "punctuation.separator.comma.chicory"
+              }
+          ]
+      },
+      "jsxExpression": {
+        "patterns": [
+            { "include": "#jsxSelfClosingElement" },
+            {
+              "name": "meta.jsx.chicory",
+              "begin": "<([a-zA-Z_][a-zA-Z0-9_]*)\\s*",
+              "end": "</\\1>",
+              "beginCaptures": {
+                "1": { "name": "entity.name.tag.chicory" }
+              },
+              "endCaptures": {
+                "0": { "name": "entity.name.tag.chicory" },
+                "1": { "name": "entity.name.tag.chicory" }
+              },
+               "patterns": [
+                  { "include": "#jsxAttributes" },
+                  { "include": "#jsxChild" }
+               ]
+          }
+  
+        ]
+      },
+  
+      "jsxAttributes":{
+          "patterns":[
+              { "include": "#jsxAttribute" }
+          ]
+      },
+  
+      "jsxAttribute": {
+          "name": "meta.jsx.attribute.chicory",
+          "match": "([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=)\\s*(\\{[^}]*\\}|\"[^\"]*\"|[0-9]+(?:\\.[0-9]+)?)",
+          "captures":{
+              "1":{"name":"entity.other.attribute-name.chicory"},
+              "2":{"name":"keyword.operator.assignment.chicory"},
+              "3":{"name":"string.quoted.double.chicory"}
+          }
+      },
+    "jsxSelfClosingElement": {
+      "name": "meta.jsx.self-closing.chicory",
+      "begin": "<([a-zA-Z_][a-zA-Z0-9_]*)\\s*",
+      "end": "/>",
+      "beginCaptures": {
+        "1": { "name": "entity.name.tag.chicory" }
+      },
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.tag.end.chicory" }
+      },
+      "patterns": [
+        { "include": "#jsxAttributes" }
+      ]
+    },
+  
+     "jsxChild":{
+      "patterns":[
+          { "include": "#jsxExpression" },
+          {
+              "name": "meta.embedded.expression.chicory",
+              "begin": "\\{",
+              "end": "\\}",
+              "beginCaptures": { "0": { "name": "punctuation.section.embedded.begin.chicory" }},
+              "endCaptures": { "0": { "name": "punctuation.section.embedded.end.chicory" } },
+              "patterns":[
+                  { "include": "#expressions" }
+              ]
+          },
+          {
+            "name": "string.unquoted.chicory",
+            "match": "[^<{\\n]+"
+          }
+      ]
+     },
+  
+      "matchExpression": {
+        "name": "meta.match.chicory",
+        "begin": "(match)\\s*(\\()",
+        "end": "\\}",
+        "beginCaptures":{
+          "1": { "name": "keyword.control.match.chicory" },
+          "2": { "name":"punctuation.section.group.chicory" }
+        },
+        "endCaptures":{
+          "0": {"name": "punctuation.definition.block.chicory"}
+        },
+        "patterns": [
+          { "include": "#expressions" },
+          { "include": "#matchArm" },
+          {
+            "match": ",",
+            "name": "punctuation.separator.comma.chicory"
+          },
+          {
+              "match":"\\{",
+              "name":"punctuation.definition.block.chicory"
+          }
+        ]
+      },
+      "matchArm": {
+        "name": "meta.match.arm.chicory",
+        "begin": "([a-zA-Z_][a-zA-Z0-9_]*|_)(\\s*\\(\\s*([a-zA-Z_][a-zA-Z0-9_]*|_|\"[^\"]*\"|[0-9]+(?:\\.[0-9]+)?)\\s*\\))?\\s*(=>)",
+        "end": "(?=\\n|,|\\})",
+        "beginCaptures": {
+          "1": { "name": "variable.other.match.pattern.chicory" },
+          "2": { "name": "meta.match.pattern.with.params.chicory" },
+          "3": { "name": "variable.parameter.match.param.chicory"},
+          "4": { "name": "keyword.operator.arrow.chicory" }
+        },
+          "patterns":[
+              { "include": "#expressions" }
+          ]
+      },
+      "blockExpression": {
+        "name": "meta.block.chicory",
+        "begin": "\\{",
+        "end": "\\}",
+        "beginCaptures": {
+          "0": { "name": "punctuation.definition.block.begin.chicory" }
+        },
+        "endCaptures": {
+          "0": { "name": "punctuation.definition.block.end.chicory" }
+        },
+        "patterns": [
+          { "include": "#statements" },
+          { "include": "#expressions" }
+        ]
+      },
+      "memberExpression": {
+        "name": "meta.member.access.chicory",
+        "match": "(\\.)\\s*([a-zA-Z_][a-zA-Z0-9_]*)",
+        "captures": {
+          "1": { "name": "punctuation.accessor.chicory" },
+          "2": { "name": "variable.other.property.chicory" }
+        }
+      },
+      "indexExpression": {
+        "name": "meta.indexed.access.chicory",
+        "begin": "\\[",
+        "end": "\\]",
+        "beginCaptures": {
+          "0": { "name": "punctuation.section.brackets.begin.chicory" }
+        },
+        "endCaptures": {
+          "0": { "name": "punctuation.section.brackets.end.chicory" }
+        },
+        "patterns": [
+          { "include": "#expressions" }
+        ]
+      },
+      "callExpression": {
+        "name": "meta.function.call.chicory",
+        "begin": "\\(",
+        "end": "\\)",
+        "beginCaptures": {
+          "0": { "name": "punctuation.section.group.begin.chicory" }
+        },
+        "endCaptures": {
+          "0": { "name": "punctuation.section.group.end.chicory" }
+        },
+        "patterns": [
+          { "include": "#expressions" },
+           {
+              "match": ",",
+              "name": "punctuation.separator.comma.chicory"
+           }
+        ]
+      },
+      "operationExpression": {
+        "name": "keyword.operator.chicory",
+        "match": "(\\+|-|\\*|/|==|!=|<|>|<=|>=|&&|\\|\\|)"
+      },
+  
+      "identifierExpression": {
+        "name": "variable.other.readwrite.chicory",
+        "match": "([a-zA-Z_][a-zA-Z0-9_]*)"
+      },
+      "keywords": {
+        "patterns": [
+          {
+            "name": "keyword.control.chicory",
+            "match": "\\b(if|else|match|type|import|from|export)\\b"
+          },
+          {
+            "name": "keyword.control.assignment.chicory",
+            "match": "\\b(let|const)\\b"
+          },
+          {
+              "name": "constant.language.boolean.chicory",
+              "match": "\\b(true|false)\\b"
+          }
+        ]
+      },
+      "literals": {
+        "patterns": [
+          {
+            "name": "string.quoted.double.chicory",
+            "begin": "\"",
+            "end": "\"",
+            "patterns": [
+              {
+                "name": "constant.character.escape.chicory",
+                "match": "\\\\."
+              }
+            ]
+          },
+          {
+            "name": "constant.numeric.chicory",
+            "match": "[0-9]+(?:\\.[0-9]+)?"
+          }
+        ]
+      },
+      "comments": {
+        "patterns": [
+          {
+            "name": "comment.line.double-slash.chicory",
+            "match": "//.*"
+          },
+          {
+            "name": "comment.block.chicory",
+            "begin": "/\\*",
+            "end": "\\*/"
+          }
+        ]
+      }
+    }
+  }
