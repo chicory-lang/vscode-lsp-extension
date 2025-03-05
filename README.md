@@ -12,6 +12,28 @@ Note: This whole project is a WIP. Expect bugs at every point, from syntax highl
 
 [Debugging instructions can be found here][debug]
 
+## Usage with Neovim
+
+You can use just the server with Neovim. I'm using bun here, because it will automatically handle dependencies etc. But you build and run the `server.ts` with typescript and node. If you can do that, somewhere in your neovim config, you'll need to add the following (if you're compiling the ts into js, make sure you point at the compiled file):
+
+```lua
+-- Define the custom server configuration for "chicory"
+local lspconfig = require('lspconfig')
+local configs = require('lspconfig.configs')
+
+if not configs.chicory then
+  configs.chicory = {
+    default_config = {
+      cmd = { 'bun', 'run', '/path/to/server.ts', '--stdio' },
+      filetypes = { "chicory" },                                      -- Filetypes that trigger this server
+      root_dir = lspconfig.util.root_pattern(".git", "package.json"), -- Determine project root by looking for a .git directory
+    }
+  }
+end
+
+lspconfig.chicory.setup {}
+```
+
 ## Distributing your extension
 
 Read the full [Publishing Extensions doc][publish] for the full details.
